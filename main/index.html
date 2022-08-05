@@ -1,0 +1,38 @@
+<!--index.html-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../contents/bootstrap/5.2.0/css/bootstrap.min.css" />
+    <script src="../contents/jquery/jquery.min.js"></script>
+
+    <title>Brewery Management</title>
+  </head>
+  <body>
+    <h1>Goodwood Management</h1>
+
+    <h2>Existing Batches</h2>
+    <div class="container" id="existingBatches">
+      
+    </div>
+    
+    <div class="container"> 
+      <div class="row"> 
+        <div class="col">
+          <button id="createBatch" class="btn btn-primary" >Create a New Batch</button>
+        </div>
+      </div>
+    </div>
+    
+    
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./rendererMain.js"></script>
+  </body>
+</html>

@@ -1,1 +1,7 @@
 node_modules
+brewDB
+grainDB
+.DS_Store
+contents/.DS_Store
+contents/bootstrap/.DS_Store
+contents/bootstrap/5.2.0/.DS_Store

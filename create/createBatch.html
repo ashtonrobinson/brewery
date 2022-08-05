@@ -1,0 +1,55 @@
+<!--index.html-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../contents/bootstrap/5.2.0/css/bootstrap.min.css" />
+    <script src="../contents/jquery/jquery.min.js"></script>
+
+    <title>Create a Batch</title>
+  </head>
+  <body>
+    <h1>Create A New Batch</h1>
+    <div class="container">
+      <label for="batchName" class="form-label">Batch Name</label>
+      <input type="text" class="form-control" id="batchName">
+    </div>
+    
+    <div class="container text-center" id="grainEntry">  
+      <div class="row row-cols-2" id="row-1"> 
+        <div class="col">
+          <label for="lbGrain-1" class="form-label">lb Grain</label>
+          <input type="number" class="form-control" id="lbGrain-1">
+        </div>
+        <div class="col">
+          <label for="typeGrain-1" class="form-label">Type of Grain</label>
+          <input type="text" class="form-control" id="typeGrain-1">
+        </div>
+      </div>
+
+      <div class="row row-cols-2" id="addRemoveGrain">
+        <div class="col">
+          <button id="addGrain" class="btn btn-primary">Add Row</button>
+        </div>
+        <div class="col">
+          <button id="removeGrain" class="btn btn-danger">Remove Row</button>
+        </div> 
+      </div>
+      <!-- if another element added after, must modify renderer for adding -->
+      <!-- and removing entry for grain and grainLB -->
+    </div>
+
+    <div class="d-grid" id="submitGrain">
+      <button id="submit" class="btn btn-success">Create</button>
+    </div>
+    
+    <!-- You can also require other files to run in this process -->
+    <script src="./rendererCreateBatch.js"></script>
+  </body>
+</html>
