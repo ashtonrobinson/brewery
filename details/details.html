@@ -1,0 +1,55 @@
+<!--index.html-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../contents/bootstrap/5.2.0/css/bootstrap.min.css" />
+    <script src="../contents/jquery/jquery.min.js"></script>
+
+    <title>Brewery Management Details</title>
+  </head>
+  <body>
+    <h1 id="batchName"></h1>
+    <h5 id="batchID"></h1>
+    <h5 id="date"></h3>
+    
+    <div class="container">
+        <h4 id="grainName"></h4>
+        <!-- retrieve grain bill info and display here -->
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <button id="mashBtn" class="btn btn-primary">View Mash Data</button>
+            </div>
+            <div class="col">
+                <button id="kettleBtn" class="btn btn-primary">View Kettle Data</button>
+            </div>
+            <div class="col">
+                <button id="fermentorBtn" class="btn btn-primary">View Fermentor Data</button>
+            </div>
+            <div class="col">
+                <button id="centrifugeBtn" class="btn btn-primary">View Centrifuge Data</button>
+            </div>
+            <div class="col">
+                <button id="briteBtn" class="btn btn-primary">View Brite Data</button>
+            </div>
+            <div class="col">
+                <button id="outputBtn" class="btn btn-success">View Output Data</button>
+            </div>
+        </div>
+    </div>
+    
+    
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./rendererDetails.js"></script>
+  </body>
+</html>

@@ -9,26 +9,29 @@ createButton.addEventListener('click', () => {
 window.addEventListener('DOMContentLoaded', async () => {
     let existing = $('#existingBatches');
     let data = await window.dashboard.loadExisting();
-    finalHtml = '<div class="row">';
 
     data.map(entry => {
         let batchID = entry['batchID'];
-        let name = entry['nameGrainBill'];
+        let batchName = entry['name'];
+        let nameGrain = entry['nameGrainBill'];
+        let date = entry['date'];
         let html =
-        `<div class="col">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Grain Bill: ${name}</h5>
-                    <p class="card-text">Batch ID: ${batchID}</p>
-                    <button id="details-${batchID}" class="btn btn-primary">View</a>
+        `<div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Name: ${batchName}</h5>
+                        <p class="card-text">Grain Bill: ${nameGrain}</p>
+                        <p class="card-text">Batch ID: ${batchID}</p>
+                        <p class="card-text">Date Created: ${date}</p>
+
+                        <button id="details-${batchID}" class="btn btn-primary">View</a>
+                    </div>
                 </div>
             </div>
         </div>`;
-        finalHtml += html;
+        existing.append(html);
     });
-
-    finalHtml += '</div>';
-    existing.append(finalHtml);
 });
 
 // create reactive buttons to view

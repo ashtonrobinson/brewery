@@ -32,24 +32,25 @@ removeRowBtn.addEventListener('click', () => {
 const submitButton = document.getElementById('submit');
 submitButton.addEventListener('click',() => {
     let batchName = $("#batchName").val();
+    let grainName = $("#grainBill").val();
 
-    if (!batchName){
-        alert("You must enter a batch name");
-    }
+    if (!(batchName && grainName)){
+        alert("Missing batch name or grain bill");
+    } else {
+        let entries = [];
 
-    let entries = [];
+        let numEntries = ($("#grainEntry").children().length)-1;
+        for (let i = 0; i < numEntries; i++){
+            let num = i+1;
+            // both of these cannot be empty
+            let lb = $(`#grainEntry #row-${num} #lbGrain-${num}`).val();
+            let typeGrain = $(`#grainEntry #row-${num} #typeGrain-${num}`).val();
 
-    let numEntries = ($("#grainEntry").children().length)-1;
-    for (let i = 0; i < numEntries; i++){
-        let num = i+1;
-        // both of these cannot be empty
-        let lb = $(`#grainEntry #row-${num} #lbGrain-${num}`).val();
-        let typeGrain = $(`#grainEntry #row-${num} #typeGrain-${num}`).val();
-
-        if (lb && typeGrain && lb > 0){
-            let entry = [typeGrain, lb]
-            entries.push(entry);
+            if (lb && typeGrain && lb > 0){
+                let entry = [typeGrain, lb]
+                entries.push(entry);
+            }
         }
+        window.newBatch.sendGrainData(batchName, grainName, entries);
     }
-    window.newBatch.sendGrainData(batchName, entries);
 });

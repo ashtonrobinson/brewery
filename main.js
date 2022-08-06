@@ -18,7 +18,7 @@ const createWindow = () => {
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname,'main/index.html'));
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
@@ -66,9 +66,9 @@ function handleCreateViewWindow(event, id) {
 
   const viewWin = new BrowserWindow({
     parent: parent,
-    modal: true,
     webPreferences: {
-      preload: path.join(__dirname, 'details/preloadDetails.js')
+      preload: path.join(__dirname, 'details/preloadDetails.js'),
+      additionalArguments: [`${id}`],
     }
   });
 
@@ -92,13 +92,13 @@ function handleBatchData() {
   });
 }
 
+// create child window to input grain data
 function handleCreateBatchWindow(event) {
   const webContents = event.sender;
   const parent = BrowserWindow.fromWebContents(webContents);
 
   const batchWindow = new BrowserWindow({
     parent: parent,
-    modal: true,
     webPreferences: {
       preload: path.join(__dirname, 'create/preloadBatch.js'),
     }
@@ -110,10 +110,10 @@ function handleCreateBatchWindow(event) {
 
 //add data entries to the database, entires is list 
 // of (grainType,lbGrain) in form (string,float)
-function handleCreateNewBatch(event, name, entries) {
+function handleCreateNewBatch(event, name, grainBill, entries) {
   // queue of sql queries to run sequentially
   let grainQueue = []
-  grainQueue.push(`CREATE TABLE ${name} (grainType TEXT, grainLb REAL);`);
+  grainQueue.push(`CREATE TABLE ${grainBill} (grainType TEXT, grainLb REAL);`);
   
   //find the smallet batch ID and add one to it
   
@@ -126,8 +126,9 @@ function handleCreateNewBatch(event, name, entries) {
         if (row['MAX(batchID)']) {batchID = row['MAX(batchID)']+1}
         else {batchID = 1}
 
+        const date = (new Date()).toLocaleDateString();
         // query to add the next entry
-        brewDB.run(`INSERT INTO batch (batchID, nameGrainBill) VALUES (${batchID}, "${name}");`);
+        brewDB.run(`INSERT INTO batch VALUES (${batchID}, "${name}", "${grainBill}", "${date}");`);
       } else {
         console.log(err);
       }
@@ -139,7 +140,7 @@ function handleCreateNewBatch(event, name, entries) {
     let grainType = entry[0];
     let lbGrain = entry[1];
 
-    grainQueue.push(`INSERT INTO ${name} (grainType, grainLb) VALUES ("${grainType}", ${lbGrain});`)
+    grainQueue.push(`INSERT INTO ${grainBill} (grainType, grainLb) VALUES ("${grainType}", ${lbGrain});`)
   });
 
   // run grain queries sequentially
