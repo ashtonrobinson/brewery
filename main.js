@@ -33,6 +33,16 @@ app.whenReady().then(() => {
   ipcMain.handle('batchData', handleBatchData);
   //open the details page for certain batch
   ipcMain.on('createViewWin', handleCreateViewWindow);
+  //get grain bill data for specific grain bill 
+  ipcMain.handle('getGrainData', handleGrainData);
+
+  // functions to create windows to view and manipulate data 
+  ipcMain.on('createMashWin', handleCreateMashWindow);
+  ipcMain.on('createKettleWin', handleCreateKettleWindow);
+  ipcMain.on('createFermentorWin', handleCreateFermentorWindow);
+  ipcMain.on('createCentrifugeWin', handleCreateCentrifugeWindow);
+  ipcMain.on('createBriteWin', handleCreateBriteWindow);
+  ipcMain.on('createOutputWin', handleCreateOutputWindow);
 
   createWindow();
 
@@ -58,17 +68,126 @@ app.on('will-quit', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-
-// id is the batchID number
-function handleCreateViewWindow(event, id) {
+function handleCreateMashWindow(event, batchID){
   const webContents = event.sender;
   const parent = BrowserWindow.fromWebContents(webContents);
 
   const viewWin = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    parent: parent,
+    webPreferences: {
+      preload: path.join(__dirname, 'brewProcess/mash/preloadMash.js'),
+      additionalArguments: [`${batchID}`],
+    }
+  });
+
+  viewWin.loadFile(path.join(__dirname, 'brewProcess/mash/mash.html'));
+  viewWin.webContents.openDevTools();
+}
+
+function handleCreateKettleWindow(event, batchID){
+  const webContents = event.sender;
+  const parent = BrowserWindow.fromWebContents(webContents);
+
+  const viewWin = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    parent: parent,
+    webPreferences: {
+      preload: path.join(__dirname, 'brewProcess/kettle/preloadKettle.js'),
+      additionalArguments: [`${batchID}`],
+    }
+  });
+
+  viewWin.loadFile(path.join(__dirname, 'brewProcess/kettle/kettle.html'));
+  viewWin.webContents.openDevTools();
+}
+
+function handleCreateFermentorWindow(event, batchID){
+  const webContents = event.sender;
+  const parent = BrowserWindow.fromWebContents(webContents);
+
+  const viewWin = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    parent: parent,
+    webPreferences: {
+      preload: path.join(__dirname, 'brewProcess/fermentor/preloadFermentor.js'),
+      additionalArguments: [`${batchID}`],
+    }
+  });
+
+  viewWin.loadFile(path.join(__dirname, 'brewProcess/fermentor/fermentor.html'));
+  viewWin.webContents.openDevTools();
+}
+
+function handleCreateCentrifugeWindow(event, batchID){
+  const webContents = event.sender;
+  const parent = BrowserWindow.fromWebContents(webContents);
+
+  const viewWin = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    parent: parent,
+    webPreferences: {
+      preload: path.join(__dirname, 'brewProcess/centrifuge/preloadCentrifuge.js'),
+      additionalArguments: [`${batchID}`],
+    }
+  });
+
+  viewWin.loadFile(path.join(__dirname, 'brewProcess/centrifuge/centrifuge.html'));
+  viewWin.webContents.openDevTools();
+}
+
+function handleCreateBriteWindow(event, batchID){
+  const webContents = event.sender;
+  const parent = BrowserWindow.fromWebContents(webContents);
+
+  const viewWin = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    parent: parent,
+    webPreferences: {
+      preload: path.join(__dirname, 'brewProcess/brite/preloadBrite.js'),
+      additionalArguments: [`${batchID}`],
+    }
+  });
+
+  viewWin.loadFile(path.join(__dirname, 'brewProcess/brite/brite.html'));
+  viewWin.webContents.openDevTools();
+}
+
+function handleCreateOutputWindow(event, batchID){
+  const webContents = event.sender;
+  const parent = BrowserWindow.fromWebContents(webContents);
+
+  const viewWin = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    parent: parent,
+    webPreferences: {
+      preload: path.join(__dirname, 'brewProcess/output/preloadOutput.js'),
+      additionalArguments: [`${batchID}`],
+    }
+  });
+
+  viewWin.loadFile(path.join(__dirname, 'brewProcess/output/output.html'));
+  viewWin.webContents.openDevTools();
+}
+
+// id is the batchID number
+function handleCreateViewWindow(event, batchID) {
+  const webContents = event.sender;
+  const parent = BrowserWindow.fromWebContents(webContents);
+
+  const viewWin = new BrowserWindow({
+    width: 1000,
+    height: 800,
     parent: parent,
     webPreferences: {
       preload: path.join(__dirname, 'details/preloadDetails.js'),
-      additionalArguments: [`${id}`],
+      additionalArguments: [`${batchID}`],
     }
   });
 
@@ -79,7 +198,6 @@ function handleCreateViewWindow(event, id) {
 // retrieve info about active batches
 function handleBatchData() {
   return new Promise((resolve,reject) => {
-    // run the query
     brewDB.all('SELECT * FROM batch', 
       function(err, rows){
         if (!err){
@@ -89,6 +207,18 @@ function handleBatchData() {
         }
       }
     );
+  });
+}
+
+function handleGrainData(event, grainBill){
+  return new Promise((resolve, reject) => {
+    grainDB.all(`SELECT * FROM ${grainBill}`, function (err, rows){
+      if(!err){
+        resolve(rows);
+      } else {
+        reject(err);
+      }
+    });
   });
 }
 
@@ -111,17 +241,10 @@ function handleCreateBatchWindow(event) {
 //add data entries to the database, entires is list 
 // of (grainType,lbGrain) in form (string,float)
 function handleCreateNewBatch(event, name, grainBill, entries) {
-  // queue of sql queries to run sequentially
-  let grainQueue = []
-  grainQueue.push(`CREATE TABLE ${grainBill} (grainType TEXT, grainLb REAL);`);
-  
-  //find the smallet batch ID and add one to it
-  
-  // query to retireve smallest batch
+  //find the largest batch ID and add one to it
   brewDB.get('SELECT MAX(batchID) FROM batch;', 
     function (err, row) {
       let batchID;
-      console.log(row);
       if (!err) {
         if (row['MAX(batchID)']) {batchID = row['MAX(batchID)']+1}
         else {batchID = 1}
@@ -135,6 +258,7 @@ function handleCreateNewBatch(event, name, grainBill, entries) {
     }
   );
 
+  let grainQueue = [];
   // enter the grain entries
   entries.map(entry => {
     let grainType = entry[0];
@@ -143,12 +267,19 @@ function handleCreateNewBatch(event, name, grainBill, entries) {
     grainQueue.push(`INSERT INTO ${grainBill} (grainType, grainLb) VALUES ("${grainType}", ${lbGrain});`)
   });
 
-  // run grain queries sequentially
-  grainDB.serialize(() => {
-    grainQueue.map(sql => {
-      grainDB.run(sql);
-    });
-  });
+
+  // TODO: problem if table exists and the details of the grain bill is different
+  grainDB.run(`CREATE TABLE ${grainBill} (grainType TEXT, grainLb REAL);`, 
+    function (err){
+      if(!err){
+        grainQueue.map(sql => {
+          grainDB.run(sql);
+        });
+      } else {
+        console.log(err);
+      }
+    }
+  );
   
   const webContents = event.sender;
   const createWin = BrowserWindow.fromWebContents(webContents);

@@ -19,10 +19,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         `<div class="row">
             <div class="col">
                 <div class="card">
+                    <div class="card-header">
+                        Batch ID: ${batchID}
+                    </div>
                     <div class="card-body">
                         <h5 class="card-title">Name: ${batchName}</h5>
                         <p class="card-text">Grain Bill: ${nameGrain}</p>
-                        <p class="card-text">Batch ID: ${batchID}</p>
                         <p class="card-text">Date Created: ${date}</p>
 
                         <button id="details-${batchID}" class="btn btn-primary">View</a>

@@ -10,7 +10,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     const batchNum = window.details.getBatchNum();
     // get entry for the batch number above
     const data = await window.details.getBatchData();
-    console.log(data);
     const entry = (data.filter(row => row['batchID'] == batchNum))[0];
 
     //assign entries
@@ -23,6 +22,43 @@ window.addEventListener('DOMContentLoaded', async () => {
     headerGrain.innerText = `Grain Bill: ${grainName}`;
     headerDate.innerText = `Date Created: ${date}`;
 
+    // add grain bill data to view page
+    const grainData = await window.details.getGrainBill(grainName);
+    const grainField = $('#grainData');
+    grainData.map(grain => {
+        let type = grain['grainType'];
+        let lb = grain['grainLb'];
+        let html = 
+        `<div class="col">
+            <p>Grain Type: ${type}</p>
+            <p>Lb Grain: ${lb}</p>
+        </div>`;
+        grainField.append(html);
+    });
+
     // add click events to all buttons
-    // to do
+    const mash = document.getElementById('mashBtn');
+    mash.addEventListener('click', () => {
+        window.details.createMashWin(batchNum);
+    });
+    const kettle = document.getElementById('kettleBtn');
+    kettle.addEventListener('click', () => {
+        window.details.createKettleWin(batchNum);
+    });
+    const fermentor = document.getElementById('fermentorBtn');
+    fermentor.addEventListener('click', () => {
+        window.details.createFermentorWin(batchNum);
+    });
+    const centrifuge = document.getElementById('centrifugeBtn');
+    centrifuge.addEventListener('click', () => {
+        window.details.createCentrifugeWin(batchNum)
+    });
+    const brite = document.getElementById('briteBtn');
+    brite.addEventListener('click', () => {
+        window.details.createBriteWin(batchNum);
+    });
+    const output = document.getElementById('outputBtn');
+    output.addEventListener('click', () => {
+        window.details.createOutputWin(batchNum);
+    });
 });
