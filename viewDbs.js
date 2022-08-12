@@ -34,5 +34,48 @@ brewDB.all('SELECT * FROM batch',
     }  
 );
 
+brewDB.all(`SELECT * FROM mash`, function (err, rows){
+    console.log("Mash Table")
+    if(!err){
+        rows.map(row => console.log(row));
+    }
+});
+
+brewDB.all(`SELECT * FROM kettle`, function (err, rows){
+    console.log("Kettle Table")
+    if(!err){
+        rows.map(row => console.log(row));
+    }
+});
+
+brewDB.all(`SELECT * FROM fermentor`, function (err, rows){
+    console.log("Fermentor Table")
+    if(!err){
+        rows.map(row => console.log(row));
+    }
+});
+
+brewDB.all(`SELECT * FROM centrifuge`, function (err, rows){
+    console.log("Centrifuge Table")
+    if(!err){
+        rows.map(row => console.log(row));
+    }
+});
+
+brewDB.all(`SELECT * FROM brite`, function (err, rows){
+    console.log("Brite Table")
+    if(!err){
+        rows.map(row => console.log(row));
+    }
+});
+
+brewDB.all(`SELECT * FROM output`, function (err, rows){
+    console.log("Output Table")
+    if(!err){
+        rows.map(row => console.log(row));
+    }
+});
+
+
 
     

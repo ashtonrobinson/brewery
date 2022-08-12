@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "viewDB": "node viewDBs.js"
+    "view": "node viewDBs.js",
+    "clean": "rm grainDB brewDB"
   },
   "author": "Ashton Robinson",
   "license": "ISC",

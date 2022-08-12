@@ -15,6 +15,71 @@
     <title>Brewery Management--Mash</title>
   </head>
   <body>
+    <!-- inject values using jquery -->
+    <h1 id="mashID"></h1>
+    
+
+    <div class="container" id="mashData">
+      <div class="row">
+        <label for="date" class="form-label">Date</label>
+        <input type="text" class="form-control" id="date" disabled="true">
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="mashExpIn" class="form-label">Water Into Mash Expected</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="mashExpIn" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text" id="units">gallons</span>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <label for="mashActIn" class="form-label">Water Into Mash Actual</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="mashActIn" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text" id="units">gallons</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="spargeExpIn" class="form-label">Water Into Sparge Expected</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="spargeExpIn" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text" id="units">gallons</span>
+            </div>
+          </div>
+          
+        </div>
+        <div class="col">
+          <label for="spargeActIn" class="form-label">Water Into Sparge Actual</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="spargeActIn" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text" id="units">gallons</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <label for="notes" class="form-label">Notes</label>
+        <textarea id="notes" disabled="true"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-danger" id="lock">Unlock</button>
+        </div>
+        <div class="col">
+          <button class="btn btn-primary" id="update" disabled="true">Update</button>
+        </div>
+        
+      </div>
+    </div>
 
     <!-- You can also require other files to run in this process -->
     <script src="./rendererMash.js"></script>

@@ -8,31 +8,52 @@ createButton.addEventListener('click', () => {
 
 window.addEventListener('DOMContentLoaded', async () => {
     let existing = $('#existingBatches');
+    let completed = $('#completedBatches');
     let data = await window.dashboard.loadExisting();
 
     data.map(entry => {
         let batchID = entry['batchID'];
         let batchName = entry['name'];
         let nameGrain = entry['nameGrainBill'];
-        let date = entry['date'];
+        let date = entry['startDate'];
+        let status = entry['status'];
+
         let html =
-        `<div class="row">
+        `<div class="row" id="batch-${batchID}">
             <div class="col">
                 <div class="card">
                     <div class="card-header">
                         Batch ID: ${batchID}
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" id="body-${batchID}">
                         <h5 class="card-title">Name: ${batchName}</h5>
                         <p class="card-text">Grain Bill: ${nameGrain}</p>
                         <p class="card-text">Date Created: ${date}</p>
 
-                        <button id="details-${batchID}" class="btn btn-primary">View</a>
+                        <button id="details-${batchID}" class="btn btn-primary">View</button>
                     </div>
                 </div>
             </div>
         </div>`;
-        existing.append(html);
+        let newElem = $(html);
+        
+        if (!status) newElem.appendTo("#completedBatches") 
+        else newElem.appendTo("#existingBatches");
+
+        
+        let cardBody = $(`#body-${batchID}`);
+        let btn;
+
+        // status is true if the batch has been completed
+        if (!status){
+            btn = $(`<button id="completed-${batchID}" class="btn btn-success">Complete</button>`);
+            cardBody.append(btn);
+            existing.append(newElem);
+        } else {
+            btn = $(`<button id="completed-${batchID}" class="btn btn-danger">Uncomplete</button>`);
+            cardBody.append(btn);
+            completed.append(newElem);
+        }       
     });
 });
 
@@ -46,6 +67,15 @@ window.addEventListener('load', async () => {
         button.addEventListener('click', () => {
             window.dashboard.createDetailsWin(batchID);
         });
+
+        // add event listeners for each completed button to toggle
+        let complButton = document.getElementById(`completed-${batchID}`);
+        complButton.addEventListener('click', () => {
+            window.dashboard.changeStatus(batchID);
+        });
+
     }); 
 });
+
+
 

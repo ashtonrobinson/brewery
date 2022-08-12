@@ -15,7 +15,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     //assign entries
     const batchName = entry['name'];
     const grainName = entry['nameGrainBill'];
-    const date = entry['date'];
+    const date = entry['startDate'];
 
     headerID.innerText = `BatchID: ${batchNum}`;
     headerName.innerText = `Batch Name: ${batchName}`;
@@ -23,17 +23,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     headerDate.innerText = `Date Created: ${date}`;
 
     // add grain bill data to view page
-    const grainData = await window.details.getGrainBill(grainName);
-    const grainField = $('#grainData');
-    grainData.map(grain => {
-        let type = grain['grainType'];
-        let lb = grain['grainLb'];
-        let html = 
-        `<div class="col">
-            <p>Grain Type: ${type}</p>
-            <p>Lb Grain: ${lb}</p>
-        </div>`;
-        grainField.append(html);
+    const grainBtn = document.getElementById('viewGrain');
+    grainBtn.addEventListener('click', () => {
+        window.details.createGrainWin(batchNum);
     });
 
     // add click events to all buttons

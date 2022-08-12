@@ -35,6 +35,7 @@ app.whenReady().then(() => {
   ipcMain.on('createViewWin', handleCreateViewWindow);
   //get grain bill data for specific grain bill 
   ipcMain.handle('getGrainData', handleGrainData);
+  ipcMain.on('changeStatus', handleChangeStatus);
 
   // functions to create windows to view and manipulate data 
   ipcMain.on('createMashWin', handleCreateMashWindow);
@@ -43,6 +44,12 @@ app.whenReady().then(() => {
   ipcMain.on('createCentrifugeWin', handleCreateCentrifugeWindow);
   ipcMain.on('createBriteWin', handleCreateBriteWindow);
   ipcMain.on('createOutputWin', handleCreateOutputWindow);
+  ipcMain.on('createGrainWin', handleCreateGrainWin);
+
+  ipcMain.on('setMashData', handleSetMashData);
+
+  //get mash data
+  ipcMain.handle('mashData', handleGetMashData);
 
   createWindow();
 
@@ -66,8 +73,149 @@ app.on('will-quit', () => {
   grainDB.close();
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+//HELPER METHODS TO GET DATA
+function handleGetMashData(event, batchID){
+  return new Promise((resolve, reject) => {
+    brewDB.get(`SELECT * FROM mash WHERE batchID=${batchID}`,
+      function(err, row){
+        (!err) ? resolve(row) : reject(err);
+      }
+    );
+  });
+}
+// retrieve info about all batches
+function handleBatchData() {
+  return new Promise((resolve,reject) => {
+    brewDB.all('SELECT * FROM batch', 
+      function(err, rows){
+        if (!err){
+          resolve(rows);
+        } else {
+          reject(err);
+        }
+      }
+    );
+  });
+}
+
+function handleGrainData(event, grainBill){
+  return new Promise((resolve, reject) => {
+    grainDB.all(`SELECT * FROM ${grainBill}`, function (err, rows){
+      if(!err){
+        resolve(rows);
+      } else {
+        reject(err);
+      }
+    });
+  });
+}
+
+
+//HELPER METHODS TO UPDATE DATA
+function handleSetMashData(event, batchID, data){
+  let date = data.date;
+  let mashEx = data.mashExpIn;
+  let mashAct = data.mashActIn;
+  let spargeExp = data.spargeExpIn;
+  let spargeAct = data.spargeActIn;
+  let notes = data.notes;
+
+  brewDB.run(`UPDATE mash SET mashInExp=${mashEx}, mashInAct=${mashAct}, spargeInExp=${spargeExp},\
+    spargeInAct=${spargeAct}, notes="${notes}", date="${date}" WHERE batchID=${batchID}`);
+}
+
+
+function handleChangeStatus(event, batchID){
+  brewDB.get(`SELECT status FROM batch WHERE batchID=${batchID}`, 
+    function (err, row){
+      const stat = row['status'];
+      const newStatus = stat == 0 ? 1 : 0;
+      if(!err){
+        brewDB.run(`UPDATE batch SET status=${newStatus} WHERE batchID=${batchID}`);
+      }
+    }
+  );
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.reload();
+}
+
+//add data entries to the database, entires is list 
+// of (grainType,lbGrain) in form (string,float)
+function handleCreateNewBatch(event, name, grainBill, entries) {
+  //find the largest batch ID and add one to it
+  brewDB.get('SELECT MAX(batchID) FROM batch;', 
+    function (err, row) {
+      let batchID;
+      if (!err) {
+        if (row['MAX(batchID)']) {batchID = row['MAX(batchID)']+1}
+        else {batchID = 1}
+
+        const date = (new Date()).toLocaleDateString();
+        // query to add the next entry
+        
+        brewDB.run(`INSERT INTO batch VALUES (${batchID}, "${name}", "${grainBill}", "${date}", FALSE);`);
+        brewDB.run(`INSERT INTO mash (batchID, date) VALUES (${batchID}, "${date}")`);
+        brewDB.run(`INSERT INTO kettle (batchID, date) VALUES (${batchID}, "${date}")`);
+      } else {
+        console.log(err);
+      }
+    }
+  );
+
+  let grainQueue = [];
+  // enter the grain entries
+  entries.map(entry => {
+    let grainType = entry[0];
+    let lbGrain = entry[1];
+
+    grainQueue.push(`INSERT INTO ${grainBill} (grainType, grainLb) VALUES ("${grainType}", ${lbGrain});`)
+  });
+
+  // TODO: problem if table exists and the details of the grain bill is different
+  grainDB.run(`CREATE TABLE ${grainBill} (grainType TEXT, grainLb REAL);`, 
+    function (err){
+      if(!err){
+        grainQueue.map(sql => {
+          grainDB.run(sql);
+        });
+      } else {
+        console.log(err);
+      }
+    }
+  );
+  
+  const webContents = event.sender;
+  const createWin = BrowserWindow.fromWebContents(webContents);
+  
+  // get parent window and update existing batches
+  const mainWin = createWin.getParentWindow();
+  mainWin.reload();
+
+  //finally close the window
+  createWin.close();
+}
+
+
+//HELPER METHODS TO CREATE NEW WINDOWS
+function handleCreateGrainWin(event, batchID){
+  const webContents = event.sender;
+  const parent = BrowserWindow.fromWebContents(webContents);
+
+  const viewWin = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    parent: parent,
+    webPreferences: {
+      preload: path.join(__dirname, 'brewProcess/grain/preloadGrain.js'),
+      additionalArguments: [`${batchID}`],
+    }
+  });
+
+  viewWin.loadFile(path.join(__dirname, 'brewProcess/grain/grain.html'));
+  viewWin.webContents.openDevTools();
+}
+
 function handleCreateMashWindow(event, batchID){
   const webContents = event.sender;
   const parent = BrowserWindow.fromWebContents(webContents);
@@ -195,32 +343,7 @@ function handleCreateViewWindow(event, batchID) {
   //viewWin.webContents.openDevTools();
 }
 
-// retrieve info about active batches
-function handleBatchData() {
-  return new Promise((resolve,reject) => {
-    brewDB.all('SELECT * FROM batch', 
-      function(err, rows){
-        if (!err){
-          resolve(rows);
-        } else {
-          reject(err);
-        }
-      }
-    );
-  });
-}
 
-function handleGrainData(event, grainBill){
-  return new Promise((resolve, reject) => {
-    grainDB.all(`SELECT * FROM ${grainBill}`, function (err, rows){
-      if(!err){
-        resolve(rows);
-      } else {
-        reject(err);
-      }
-    });
-  });
-}
 
 // create child window to input grain data
 function handleCreateBatchWindow(event) {
@@ -237,59 +360,4 @@ function handleCreateBatchWindow(event) {
   batchWindow.loadFile(path.join(__dirname,'create/createBatch.html'));
   //batchWindow.webContents.openDevTools();
 }
-
-//add data entries to the database, entires is list 
-// of (grainType,lbGrain) in form (string,float)
-function handleCreateNewBatch(event, name, grainBill, entries) {
-  //find the largest batch ID and add one to it
-  brewDB.get('SELECT MAX(batchID) FROM batch;', 
-    function (err, row) {
-      let batchID;
-      if (!err) {
-        if (row['MAX(batchID)']) {batchID = row['MAX(batchID)']+1}
-        else {batchID = 1}
-
-        const date = (new Date()).toLocaleDateString();
-        // query to add the next entry
-        brewDB.run(`INSERT INTO batch VALUES (${batchID}, "${name}", "${grainBill}", "${date}");`);
-      } else {
-        console.log(err);
-      }
-    }
-  );
-
-  let grainQueue = [];
-  // enter the grain entries
-  entries.map(entry => {
-    let grainType = entry[0];
-    let lbGrain = entry[1];
-
-    grainQueue.push(`INSERT INTO ${grainBill} (grainType, grainLb) VALUES ("${grainType}", ${lbGrain});`)
-  });
-
-
-  // TODO: problem if table exists and the details of the grain bill is different
-  grainDB.run(`CREATE TABLE ${grainBill} (grainType TEXT, grainLb REAL);`, 
-    function (err){
-      if(!err){
-        grainQueue.map(sql => {
-          grainDB.run(sql);
-        });
-      } else {
-        console.log(err);
-      }
-    }
-  );
-  
-  const webContents = event.sender;
-  const createWin = BrowserWindow.fromWebContents(webContents);
-  
-  // get parent window and update existing batches
-  const mainWin = createWin.getParentWindow();
-  mainWin.reload();
-
-  //finally close the window
-  createWin.close();
-}
-
 

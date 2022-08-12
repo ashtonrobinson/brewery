@@ -11,4 +11,5 @@ contextBridge.exposeInMainWorld('details', {
     createCentrifugeWin: (batchID) => ipcRenderer.send('createCentrifugeWin', batchID),
     createBriteWin: (batchID) => ipcRenderer.send('createBriteWin', batchID),
     createOutputWin: (batchID) => ipcRenderer.send('createOutputWin', batchID),
+    createGrainWin: (batchID) => ipcRenderer.send('createGrainWin', batchID),
 });
