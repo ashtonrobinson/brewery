@@ -30,7 +30,7 @@ app.whenReady().then(() => {
   // create the database entry for new batch
   ipcMain.on('createBatchEntry', handleCreateNewBatch);
   // retrieve the data and return it to the UI
-  ipcMain.handle('batchData', handleBatchData);
+  ipcMain.handle('batchData', handleBatchDataAll);
   //open the details page for certain batch
   ipcMain.on('createViewWin', handleCreateViewWindow);
   //get grain bill data for specific grain bill 
@@ -50,6 +50,8 @@ app.whenReady().then(() => {
 
   //get mash data
   ipcMain.handle('mashData', handleGetMashData);
+
+  ipcMain.handle('getGrainBillName', handleGetGrainBillName);
 
   createWindow();
 
@@ -84,7 +86,7 @@ function handleGetMashData(event, batchID){
   });
 }
 // retrieve info about all batches
-function handleBatchData() {
+function handleBatchDataAll() {
   return new Promise((resolve,reject) => {
     brewDB.all('SELECT * FROM batch', 
       function(err, rows){
@@ -98,14 +100,32 @@ function handleBatchData() {
   });
 }
 
-function handleGrainData(event, grainBill){
+function handleGrainData(event, batchID){
   return new Promise((resolve, reject) => {
-    grainDB.all(`SELECT * FROM ${grainBill}`, function (err, rows){
-      if(!err){
-        resolve(rows);
-      } else {
-        reject(err);
-      }
+    brewDB.get(`SELECT nameGrainBill FROM batch WHERE batchID=${batchID}`,
+      function (err, row){
+        let grainBill = row['nameGrainBill'];
+        if (!err){
+          grainDB.all(`SELECT * FROM ${grainBill}`, function (err, rows){
+            if(!err){
+              resolve(rows);
+            } else {
+              reject(err);
+            }
+          });
+        }
+    });
+  });
+}
+
+function handleGetGrainBillName(event, batchID){
+  return new Promise((resolve, reject) => {
+    brewDB.get(`SELECT nameGrainBill FROM batch WHERE batchID=${batchID}`,
+      function (err, row){
+        if(!err){
+          let grainBill = row['nameGrainBill'];
+          resolve(grainBill);
+        } else reject(err); 
     });
   });
 }
