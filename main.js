@@ -47,11 +47,14 @@ app.whenReady().then(() => {
   ipcMain.on('createGrainWin', handleCreateGrainWin);
 
   ipcMain.on('setMashData', handleSetMashData);
+  ipcMain.on('setKettleData', handleSetKettleData);
 
   //get mash data
   ipcMain.handle('mashData', handleGetMashData);
+  ipcMain.handle('kettleData', handleGetKettleData);
 
   ipcMain.handle('getGrainBillName', handleGetGrainBillName);
+  ipcMain.handle('getNameFromID', handleGetNameFromId);
 
   createWindow();
 
@@ -76,11 +79,34 @@ app.on('will-quit', () => {
 });
 
 //HELPER METHODS TO GET DATA
+function handleGetNameFromId(event, batchID){
+  return new Promise((resolve, reject) => {
+    brewDB.get(`SELECT name FROM batch WHERE batchID=${batchID}`,
+      function (err, row){
+        if(!err) resolve(row['name']);
+        else reject(err);
+      }
+    )
+  });
+}
+
+function handleGetKettleData(event, batchID){
+  return new Promise((resolve, reject) => {
+    brewDB.get(`SELECT * FROM kettle WHERE batchID=${batchID}`,
+      function (err, row){
+        if (!err) resolve(row)
+        else reject(err);
+      }
+    );
+  });
+}
+
 function handleGetMashData(event, batchID){
   return new Promise((resolve, reject) => {
     brewDB.get(`SELECT * FROM mash WHERE batchID=${batchID}`,
       function(err, row){
-        (!err) ? resolve(row) : reject(err);
+        if (!err) resolve(row)
+        else reject(err);
       }
     );
   });
@@ -133,15 +159,34 @@ function handleGetGrainBillName(event, batchID){
 
 //HELPER METHODS TO UPDATE DATA
 function handleSetMashData(event, batchID, data){
-  let date = data.date;
-  let mashEx = data.mashExpIn;
-  let mashAct = data.mashActIn;
-  let spargeExp = data.spargeExpIn;
-  let spargeAct = data.spargeActIn;
-  let notes = data.notes;
+  let date = data.date ? data.date : null;
+  let mashEx = data.mashExpIn ? data.mashExpIn : null;
+  let mashAct = data.mashActIn ? data.mashActIn : null;
+  let spargeExp = data.spargeExpIn ? data.spargeExpIn : null;
+  let spargeAct = data.spargeActIn ? data.spargeActIn : null;
+  let notes = data.notes ? data.notes : null;
 
   brewDB.run(`UPDATE mash SET mashInExp=${mashEx}, mashInAct=${mashAct}, spargeInExp=${spargeExp},\
     spargeInAct=${spargeAct}, notes="${notes}", date="${date}" WHERE batchID=${batchID}`);
+}
+
+function handleSetKettleData(event, batchID, data){
+  console.log(data);
+  let date = data.date ? data.date : null;
+  let wortCol = data.wortCol ? data.wortCol : null;
+  let preBoilGrav = data.preBoilGrav ? data.preBoilGrav : null;
+  let postBoilGrav = data.postBoilGrav ? data.postBoilGrav : null;
+  let preBoilVol = data.preBoilVol ? data.preBoilVol : null;
+  let postBoilVol = data.postBoilVol ? data.postBoilVol : null;
+  let waterAdded = data.waterAdded ? data.waterAdded : null;
+  let notes = data.notes ? data.notes : null;
+
+  console.log(`UPDATE kettle SET wortCol=${wortCol}, waterAdded=${waterAdded}, preBoilGrav=${preBoilGrav}, postBoilGrav=${postBoilGrav},\
+  preBoilVol=${preBoilVol}, postBoilVol=${postBoilVol}, notes="${notes}", date="${date}" WHERE batchID=${batchID}`);
+  
+  brewDB.run(`UPDATE kettle SET wortCol=${wortCol}, waterAdded=${waterAdded}, preBoilGrav=${preBoilGrav}, postBoilGrav=${postBoilGrav},\
+    preBoilVol=${preBoilVol}, postBoilVol=${postBoilVol}, notes="${notes}", date="${date}" WHERE batchID=${batchID}`,
+    function (err) {console.log(err)});
 }
 
 

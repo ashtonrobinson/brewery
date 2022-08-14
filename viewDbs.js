@@ -3,18 +3,61 @@ const brewDB = new sqlite3.Database('brewDB');
 const grainDB = new sqlite3.Database('grainDB');
 
 
+
+brewDB.serialize(() => {
+    brewDB.all(`SELECT * FROM mash`, function (err, rows){
+        console.log("Mash Table")
+        if(!err){
+            rows.map(row => console.log(row));
+        }
+    });
+
+    brewDB.all(`SELECT * FROM kettle`, function (err, rows){
+        console.log("Kettle Table")
+        if(!err){
+            rows.map(row => console.log(row));
+        }
+    });
+
+    brewDB.all(`SELECT * FROM fermentor`, function (err, rows){
+        console.log("Fermentor Table")
+        if(!err){
+            rows.map(row => console.log(row));
+        }
+    });
+
+    brewDB.all(`SELECT * FROM centrifuge`, function (err, rows){
+        console.log("Centrifuge Table")
+        if(!err){
+            rows.map(row => console.log(row));
+        }
+    });
+
+    brewDB.all(`SELECT * FROM brite`, function (err, rows){
+        console.log("Brite Table")
+        if(!err){
+            rows.map(row => console.log(row));
+        }
+    });
+
+    brewDB.all(`SELECT * FROM output`, function (err, rows){
+        console.log("Output Table")
+        if(!err){
+            rows.map(row => console.log(row));
+        }
+    });
+});
+
 // print batch and grain data
 brewDB.all('SELECT * FROM batch', 
     function (err, rows){
-        let names = [];
-        console.log('Batch Table');
+        let grainNames = [];
         if (!err){
-            rows.map(row => {
-                console.log(row);
-                names.push(row['nameGrainBill']);
-            });
+            grainNames = rows.map(row => row['nameGrainBill']);
+            
             grainDB.serialize(() => {
                 names.map(name => {
+                    console.log(`Grain Table for ${name}`);
                     grainDB.all(`SELECT * FROM ${name}`, 
                         function(err, rows){
                             if(!err){
@@ -33,48 +76,6 @@ brewDB.all('SELECT * FROM batch',
         }
     }  
 );
-
-brewDB.all(`SELECT * FROM mash`, function (err, rows){
-    console.log("Mash Table")
-    if(!err){
-        rows.map(row => console.log(row));
-    }
-});
-
-brewDB.all(`SELECT * FROM kettle`, function (err, rows){
-    console.log("Kettle Table")
-    if(!err){
-        rows.map(row => console.log(row));
-    }
-});
-
-brewDB.all(`SELECT * FROM fermentor`, function (err, rows){
-    console.log("Fermentor Table")
-    if(!err){
-        rows.map(row => console.log(row));
-    }
-});
-
-brewDB.all(`SELECT * FROM centrifuge`, function (err, rows){
-    console.log("Centrifuge Table")
-    if(!err){
-        rows.map(row => console.log(row));
-    }
-});
-
-brewDB.all(`SELECT * FROM brite`, function (err, rows){
-    console.log("Brite Table")
-    if(!err){
-        rows.map(row => console.log(row));
-    }
-});
-
-brewDB.all(`SELECT * FROM output`, function (err, rows){
-    console.log("Output Table")
-    if(!err){
-        rows.map(row => console.log(row));
-    }
-});
 
 
 

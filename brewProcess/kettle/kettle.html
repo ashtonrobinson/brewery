@@ -15,6 +15,98 @@
     <title>Brewery Management--Kettle</title>
   </head>
   <body>
+    <h1 id="kettleID"></h1>
+
+    <div class="container">
+      <div class="row">
+        <label for="date" class="form-label">Date</label>
+        <input type="text" class="form-control" id="date" disabled="true">
+      </div>
+
+      <div class="mt-2 row">
+        <div class="col">
+          <label for="wortCollected" class="form-label">Wort Collected</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="wortCollected" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text">gallons</span>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col">
+          <label for="waterIn" class="form-label">Water Added to Kettle</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="waterIn" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text">gallons</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 row">
+        <div class="col">
+          <label for="preGrav" class="form-label">Preboil Gravity</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="preGrav" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text">grav</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <label for="postGrav" class="form-label">Postboil Gravity</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="postGrav" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text">grav</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 row">
+        <div class="col">
+          <label for="preVol" class="form-label">Preboil Volume</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="preVol" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text">gallons</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <label for="postVol" class="form-label">Postboil Volume</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="postVol" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text">gallons</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        <label for="notes" class="form-label">Notes</label>
+        <textarea id="notes" disabled="true"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-danger" id="lock">Unlock</button>
+        </div>
+        <div class="col">
+          <button class="btn btn-primary" id="update" disabled="true">Update</button>
+        </div>
+        
+      </div>
+
+
+    </div>
+
 
     <!-- You can also require other files to run in this process -->
     <script src="./rendererKettle.js"></script>
