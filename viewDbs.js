@@ -10,6 +10,7 @@ brewDB.serialize(() => {
         if(!err){
             rows.map(row => console.log(row));
         }
+        console.log("\n");
     });
 
     brewDB.all(`SELECT * FROM kettle`, function (err, rows){
@@ -17,6 +18,7 @@ brewDB.serialize(() => {
         if(!err){
             rows.map(row => console.log(row));
         }
+        console.log("\n");
     });
 
     brewDB.all(`SELECT * FROM fermentor`, function (err, rows){
@@ -24,6 +26,7 @@ brewDB.serialize(() => {
         if(!err){
             rows.map(row => console.log(row));
         }
+        console.log("\n");
     });
 
     brewDB.all(`SELECT * FROM centrifuge`, function (err, rows){
@@ -31,6 +34,7 @@ brewDB.serialize(() => {
         if(!err){
             rows.map(row => console.log(row));
         }
+        console.log("\n");
     });
 
     brewDB.all(`SELECT * FROM brite`, function (err, rows){
@@ -38,6 +42,7 @@ brewDB.serialize(() => {
         if(!err){
             rows.map(row => console.log(row));
         }
+        console.log("\n");
     });
 
     brewDB.all(`SELECT * FROM output`, function (err, rows){
@@ -45,6 +50,7 @@ brewDB.serialize(() => {
         if(!err){
             rows.map(row => console.log(row));
         }
+        console.log("\n");
     });
 });
 
@@ -53,10 +59,10 @@ brewDB.all('SELECT * FROM batch',
     function (err, rows){
         let grainNames = [];
         if (!err){
-            grainNames = rows.map(row => row['nameGrainBill']);
+            let grainNames = rows.map(row => row['nameGrainBill']);
             
             grainDB.serialize(() => {
-                names.map(name => {
+                grainNames.map(name => {
                     console.log(`Grain Table for ${name}`);
                     grainDB.all(`SELECT * FROM ${name}`, 
                         function(err, rows){
@@ -68,6 +74,7 @@ brewDB.all('SELECT * FROM batch',
                             }
                         }
                     );
+                    console.log("\n");
                 });
             });
             

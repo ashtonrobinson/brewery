@@ -17,19 +17,19 @@
   <body>
     <h1>Create A New Batch</h1>
     <div class="container">
-      <div class="row">
+      <div class="my-2 row">
         <label for="batchName" class="form-label">Batch Name</label>
         <input type="text" class="form-control" id="batchName">
       </div>
       <!-- add a way to view existing grain bill information -->
-      <div class="row">
+      <div class="my-2 row">
         <label for="grainBill" class="form-label">Grain Bill Name</label>
         <input type="text" class="form-control" id="grainBill">
       </div>
     </div>
     
     <div class="container text-center" id="grainEntry">  
-      <div class="row row-cols-2" id="row-1"> 
+      <div class="my-2 row" id="row-1"> 
         <div class="col">
           <label for="lbGrain-1" class="form-label">lb Grain</label>
           <input type="number" class="form-control" id="lbGrain-1">
@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      <div class="row row-cols-2" id="addRemoveGrain">
+      <div class="my-2 row" id="addRemoveGrain">
         <div class="col">
           <button id="addGrain" class="btn btn-primary">Add Row</button>
         </div>
@@ -52,7 +52,7 @@
       <!-- and removing entry for grain and grainLB -->
     </div>
 
-    <div class="d-grid" id="submitGrain">
+    <div class="mx-2 d-grid" id="submitGrain">
       <button id="submit" class="btn btn-success">Create</button>
     </div>
     

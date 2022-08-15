@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('mash', {
     getBatchId: () => batchID,
     getMashData: () => ipcRenderer.invoke('mashData', batchID),
     sendMashData: (data) => ipcRenderer.send('setMashData', batchID, data),
+    getBatchName: () => ipcRenderer.invoke('getNameFromID', batchID),
 });

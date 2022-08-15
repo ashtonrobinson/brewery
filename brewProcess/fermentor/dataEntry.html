@@ -1,0 +1,62 @@
+<!--index.html-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../../contents/bootstrap/5.2.0/css/bootstrap.min.css" />
+    <script src="../../contents/jquery/jquery.min.js"></script>
+
+    <title>Brewery Management--Fermentor Data Entry</title>
+  </head>
+  <body>
+    <h1>Add Fermentor Entry</h1>
+    <div class="container" id="dataFields">
+        <div class="my-2 row">
+            <div class="mx-2 col">
+                <label for="plato" class="form-label">Plato</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="plato">
+                </div>
+            </div>
+            <div class="mx-2 col">
+                <label for="ph" class="form-label">ph</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="ph">
+                </div>
+            </div>
+            <div class="mx-2 col">
+                <label for="temp" class="form-label">Temperature</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="temp">
+                    <!-- below is the html entity for degrees fahrenheit -->
+                    <span class="input-group-text">&#x2109;</span>
+                </div>
+            </div>
+        </div>
+        <div class="my-2 row">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea id="notes"></textarea>
+        </div>
+    </div>
+
+    <div class="container" id="createData">
+        <div class="my-2 row">
+            <div class="mx-2 col">
+                <button class="btn btn-primary" id="createBtn">Create Entry</button> 
+            </div>
+            <div class="mx-2 col">
+                <button class="btn btn-danger" id="closeWin">Close Without Saving</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./rendererDataEntry.js"></script>
+  </body>
+</html>

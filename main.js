@@ -4,6 +4,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { brewDB, grainDB } = require('./db.js');
 const path = require('path');
+const { kMaxLength } = require('buffer');
 
 const createWindow = () => {
   // Create the browser window.
@@ -25,19 +26,9 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // create the window for new batch entry
+  // functions to create windows
   ipcMain.on('createBatchWindow', handleCreateBatchWindow);
-  // create the database entry for new batch
-  ipcMain.on('createBatchEntry', handleCreateNewBatch);
-  // retrieve the data and return it to the UI
-  ipcMain.handle('batchData', handleBatchDataAll);
-  //open the details page for certain batch
   ipcMain.on('createViewWin', handleCreateViewWindow);
-  //get grain bill data for specific grain bill 
-  ipcMain.handle('getGrainData', handleGrainData);
-  ipcMain.on('changeStatus', handleChangeStatus);
-
-  // functions to create windows to view and manipulate data 
   ipcMain.on('createMashWin', handleCreateMashWindow);
   ipcMain.on('createKettleWin', handleCreateKettleWindow);
   ipcMain.on('createFermentorWin', handleCreateFermentorWindow);
@@ -45,17 +36,30 @@ app.whenReady().then(() => {
   ipcMain.on('createBriteWin', handleCreateBriteWindow);
   ipcMain.on('createOutputWin', handleCreateOutputWindow);
   ipcMain.on('createGrainWin', handleCreateGrainWin);
+  ipcMain.on('createFermentorDataWin', handleCreateFermentorDataWin);
 
+  //close modal windows
+  ipcMain.on('closeEntryWin', handleCloseEntryWin);
+
+  //set data
   ipcMain.on('setMashData', handleSetMashData);
   ipcMain.on('setKettleData', handleSetKettleData);
+  ipcMain.on('changeStatus', handleChangeStatus);
+  ipcMain.on('createBatchEntry', handleCreateNewBatch);
+  ipcMain.on('addFermentorData', handleAddFermentorData);
+  ipcMain.on('updateFermentorData', handleUpdateFermentorData);
 
-  //get mash data
+  //get data
   ipcMain.handle('mashData', handleGetMashData);
   ipcMain.handle('kettleData', handleGetKettleData);
+  ipcMain.handle('fermentorData', handleGetFermentorData);
+  ipcMain.handle('batchData', handleBatchDataAll);
 
+  ipcMain.handle('getGrainData', handleGrainData);
   ipcMain.handle('getGrainBillName', handleGetGrainBillName);
-  ipcMain.handle('getNameFromID', handleGetNameFromId);
 
+  ipcMain.handle('getNameFromID', handleGetNameFromId);
+  
   createWindow();
 
   app.on('activate', () => {
@@ -79,6 +83,17 @@ app.on('will-quit', () => {
 });
 
 //HELPER METHODS TO GET DATA
+function handleGetFermentorData(event, batchID) {
+  return new Promise((resolve, reject) => {
+    brewDB.all(`SELECT * FROM fermentor WHERE batchID=${batchID} ORDER BY dataID`,
+      function(err, rows){
+        if(!err) resolve(rows)
+        else reject(err);
+      }
+    )
+  });
+}
+
 function handleGetNameFromId(event, batchID){
   return new Promise((resolve, reject) => {
     brewDB.get(`SELECT name FROM batch WHERE batchID=${batchID}`,
@@ -158,6 +173,56 @@ function handleGetGrainBillName(event, batchID){
 
 
 //HELPER METHODS TO UPDATE DATA
+function handleUpdateFermentorData(event, batchID, data){
+  console.log(data);
+
+  let plato = data.plato ? data.plato : null;
+  let ph = data.ph ? data.ph : null;
+  let temp = data.temp ? data.temp : null;
+  let notes = data.notes ? `"${data.notes}"` : null;
+  let date = data.date ? data.date : null;
+
+  // this is required for entry manipulation 
+  let dataID = data.dataID;
+  console.log(`UPDATE fermentor SET plato=${plato}, ph=${ph}, temp=${temp}, notes=${notes}, date="${date}" WHERE batchID=${batchID} AND dataID=${dataID}`);
+
+  brewDB.run(`UPDATE fermentor SET plato=${plato}, ph=${ph}, temp=${temp}, notes=${notes}, date="${date}" WHERE batchID=${batchID} AND dataID=${dataID}`,
+    function (err){ console.log(err) } 
+  );
+
+}
+
+function handleAddFermentorData(event, data, batchID){
+  brewDB.get(`SELECT MAX(dataID) FROM fermentor WHERE batchID=${batchID}`,
+    function (err, row){
+      if(!err){
+        console.log(err);
+        console.log(row);
+        let newID;
+        if (row['MAX(dataID)'] != 0 || row['MAX(dataID)'] == null) newID = 0;
+        else newID = row['MAX(dataID)'] + 1;
+
+        let plato = data.plato ? data.plato : null;
+        let ph = data.ph ? data.ph : null;
+        let temp = data.temp ? data.temp : null;
+        let notes = data.notes ? `"${data.notes}"` : null;
+        const date = (new Date()).toLocaleDateString();
+
+        brewDB.run(`INSERT INTO fermentor VALUES (${batchID}, ${newID}, ${plato}, ${ph}, ${temp}, "${date}", ${notes})`);
+      } 
+    }
+  );
+
+
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+ 
+  const mainWin = win.getParentWindow();
+  mainWin.reload();
+
+  win.close();
+}
+
 function handleSetMashData(event, batchID, data){
   let date = data.date ? data.date : null;
   let mashEx = data.mashExpIn ? data.mashExpIn : null;
@@ -171,7 +236,6 @@ function handleSetMashData(event, batchID, data){
 }
 
 function handleSetKettleData(event, batchID, data){
-  console.log(data);
   let date = data.date ? data.date : null;
   let wortCol = data.wortCol ? data.wortCol : null;
   let preBoilGrav = data.preBoilGrav ? data.preBoilGrav : null;
@@ -179,14 +243,10 @@ function handleSetKettleData(event, batchID, data){
   let preBoilVol = data.preBoilVol ? data.preBoilVol : null;
   let postBoilVol = data.postBoilVol ? data.postBoilVol : null;
   let waterAdded = data.waterAdded ? data.waterAdded : null;
-  let notes = data.notes ? data.notes : null;
+  let notes = data.notes ? `"${data.notes}"` : null;
 
-  console.log(`UPDATE kettle SET wortCol=${wortCol}, waterAdded=${waterAdded}, preBoilGrav=${preBoilGrav}, postBoilGrav=${postBoilGrav},\
-  preBoilVol=${preBoilVol}, postBoilVol=${postBoilVol}, notes="${notes}", date="${date}" WHERE batchID=${batchID}`);
-  
   brewDB.run(`UPDATE kettle SET wortCol=${wortCol}, waterAdded=${waterAdded}, preBoilGrav=${preBoilGrav}, postBoilGrav=${postBoilGrav},\
-    preBoilVol=${preBoilVol}, postBoilVol=${postBoilVol}, notes="${notes}", date="${date}" WHERE batchID=${batchID}`,
-    function (err) {console.log(err)});
+    preBoilVol=${preBoilVol}, postBoilVol=${postBoilVol}, notes=${notes},  date="${date}" WHERE batchID=${batchID}`);
 }
 
 
@@ -263,6 +323,23 @@ function handleCreateNewBatch(event, name, grainBill, entries) {
 
 
 //HELPER METHODS TO CREATE NEW WINDOWS
+function handleCreateFermentorDataWin(event, batchID){
+  const webContents = event.sender;
+  const parent = BrowserWindow.fromWebContents(webContents);
+
+  const entryWin = new BrowserWindow({
+    parent: parent,
+    modal: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'brewProcess/fermentor/preloadDataEntry.js'),
+      additionalArguments: [`${batchID}`]
+    }
+  });
+
+  entryWin.loadFile(path.join(__dirname, 'brewProcess/fermentor/dataEntry.html'));
+  //entryWin.webContents.openDevTools();
+}
+
 function handleCreateGrainWin(event, batchID){
   const webContents = event.sender;
   const parent = BrowserWindow.fromWebContents(webContents);
@@ -296,7 +373,7 @@ function handleCreateMashWindow(event, batchID){
   });
 
   viewWin.loadFile(path.join(__dirname, 'brewProcess/mash/mash.html'));
-  viewWin.webContents.openDevTools();
+  //viewWin.webContents.openDevTools();
 }
 
 function handleCreateKettleWindow(event, batchID){
@@ -314,7 +391,7 @@ function handleCreateKettleWindow(event, batchID){
   });
 
   viewWin.loadFile(path.join(__dirname, 'brewProcess/kettle/kettle.html'));
-  viewWin.webContents.openDevTools();
+  //viewWin.webContents.openDevTools();
 }
 
 function handleCreateFermentorWindow(event, batchID){
@@ -408,9 +485,6 @@ function handleCreateViewWindow(event, batchID) {
   //viewWin.webContents.openDevTools();
 }
 
-
-
-// create child window to input grain data
 function handleCreateBatchWindow(event) {
   const webContents = event.sender;
   const parent = BrowserWindow.fromWebContents(webContents);
@@ -424,5 +498,12 @@ function handleCreateBatchWindow(event) {
 
   batchWindow.loadFile(path.join(__dirname,'create/createBatch.html'));
   //batchWindow.webContents.openDevTools();
+}
+
+//functions to close modal windows
+function handleCloseEntryWin(event){
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.close();
 }
 

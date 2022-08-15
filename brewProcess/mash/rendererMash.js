@@ -3,7 +3,8 @@ let $ = window.jQuery;
 window.addEventListener('DOMContentLoaded', async () => {
     let mashData = await window.mash.getMashData();
     
-    let batchID = window.mash.getBatchId();
+    let name = await window.mash.getBatchName();
+
     let mashExp = mashData['mashInExp'];
     let mashAct = mashData['mashInAct'];
     let spargeExp = mashData['spargeInExp'];
@@ -12,7 +13,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     let date = mashData['date'];
 
     let title = document.getElementById('mashID');
-    title.innerText = `Batch #${batchID}`;
+    title.innerText = `Batch Name: ${name}`;
 
     let dateField = document.getElementById('date');
     dateField.value = date;
