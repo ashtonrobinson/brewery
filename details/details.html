@@ -5,54 +5,83 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="../contents/bootstrap/5.2.0/css/bootstrap.min.css" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- MUST CHANGE THIS SECURITY FEATURE TO USE RAW CSS -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+
+
     <script src="../contents/jquery/jquery.min.js"></script>
+    
+
+    <!-- custom style -->
+    <link rel="stylesheet" href="details.css">
 
     <title>Brewery Management--Details</title>
   </head>
   <body>
-    <h1 id="batchName"></h1>
-    <h5 id="batchID"></h1>
-    <h5 id="date"></h3>
-    
-    <div class="container">
-        <div class="row">
-            <div class="col align-items-end">
-                <h5 id="grainName"></h5>
+
+
+    <!-- TOPNAV, REMOVE FILLERS FROM H1 BELOW!! -->
+    <div class="topnav">
+        <!-- logo -->
+        <div style="display:flex; width:fit-content">
+            <img src="thumbnail.jpg" style="height: 100px; ">
+        </div>
+        <!-- logo extension -->
+        <div style="display:flex; width:100%; flex-direction: column;">
+            <!-- top stripes -->
+            <div class="topnavStripe" style="margin-top: 2px;"></div>
+            <div class="topnavStripe"  style="margin-top: 0px;"></div>
+            <!-- titles, other page topnav content goes here -->
+            <div style="display:flex; width:100%; height:33px">
+                <div style="display:flex; width:33%; height: 100%;">
+                    <h1 class="topnavName" id="batchName" style="margin-left:30px;">Batch Name: First Batch</h1>
+                </div>
+                <div style="display:flex; width:33%;">
+                    <h1 class="topnavName" id="batchID" style="margin-left:auto; margin-right:auto">Batch Id: 1126</h1>
+                </div>
+                <div style="display:flex; width:33%;">
+                    <h1 class="topnavName" id="date" style="margin-left:auto; margin-right:30px">Start Date: 8/13/2022</h1>
+                </div>
             </div>
-            <div class="col">
-                <button id="viewGrain" class="btn btn-warning">View Grain Bill</button>
-            </div>
+            <!-- bottom stripes -->
+            <div class="topnavStripe" style="margin-top: 2.5px;"></div>
+            <div class="topnavStripe"  style="margin-top: -0.75px;"></div>
         </div>
     </div>
 
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <button id="mashBtn" class="btn btn-primary">Mash Data</button>
-            </div>
-            <div class="col">
-                <button id="kettleBtn" class="btn btn-primary">Kettle Data</button>
-            </div>
-            <div class="col">
-                <button id="fermentorBtn" class="btn btn-primary">Fermentor Data</button>
-            </div>
-            <div class="col">
-                <button id="centrifugeBtn" class="btn btn-primary">Centrifuge Data</button>
-            </div>
-            <div class="col">
-                <button id="briteBtn" class="btn btn-primary">Brite Data</button>
-            </div>
-            <div class="col">
-                <button id="outputBtn" class="btn btn-success">Output Data</button>
-            </div>
+    <!-- grain info -->
+    <div class="grainInfoContainer">
+        <div class="grainInfoItem">
+            <h5 id="grainName" class="grainName">Grain Name</h5>
+        </div>
+        <div class="grainInfoItem">
+            <button id="viewGrain" class="viewGrainButton">View Grain Bill</button>
         </div>
     </div>
-    
+
+
+    <!-- space -->
+    <div style="display: flex; width: 100%; height:50px"></div>
+
+
+    <!-- circle chart -->
+    <div class="circularChartContainer" style="display:flex; width:fit-content; margin: auto;">
+        <div id="circleChart">
+            <div class='circlechartNodeWrapper'><button id="mashBtn" class="circlechartNodeContent">Mash Data</button></div>
+            <div class='circlechartNodeWrapper'><button id="kettleBtn" class="circlechartNodeContent">Kettle Data</button></div>
+            <div class='circlechartNodeWrapper'><button id="fermentorBtn" class="circlechartNodeContent">Fermentor Data</button></div>
+            <div class='circlechartNodeWrapper'><button id="centrifugeBtn" class="circlechartNodeContent">Centrifuge Data</button></div>
+            <div class='circlechartNodeWrapper'><button id="briteBtn" class="circlechartNodeContent">Brite Data</button></div>
+            <div class='circlechartNodeWrapper'><button id="outputBtn" class="circlechartNodeContent">Output Data</button></div>
+        </div>
+        <img src="brewProcess.jpg" class="brewProcessBackground">
+    </div>
+
+
+    <!-- format circle chart script -->
+    <script src="circleChart.js"></script>
     
 
     <!-- You can also require other files to run in this process -->
