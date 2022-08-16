@@ -490,7 +490,7 @@ function handleCreateViewWindow(event, batchID) {
   const parent = BrowserWindow.fromWebContents(webContents);
 
   const viewWin = new BrowserWindow({
-    width: 1000,
+    width: 1400,
     height: 800,
     parent: parent,
     webPreferences: {
