@@ -48,16 +48,16 @@ app.whenReady().then(() => {
   ipcMain.on('createBatchEntry', handleCreateNewBatch);
   ipcMain.on('addFermentorData', handleAddFermentorData);
   ipcMain.on('updateFermentorData', handleUpdateFermentorData);
+  ipcMain.on('updateCentrifugeData', handleUpdateCentrifugeData);
 
   //get data
   ipcMain.handle('mashData', handleGetMashData);
   ipcMain.handle('kettleData', handleGetKettleData);
   ipcMain.handle('fermentorData', handleGetFermentorData);
   ipcMain.handle('batchData', handleBatchDataAll);
-
+  ipcMain.handle('getCentrifugeData', handleGetCentrifugeData);
   ipcMain.handle('getGrainData', handleGrainData);
   ipcMain.handle('getGrainBillName', handleGetGrainBillName);
-
   ipcMain.handle('getNameFromID', handleGetNameFromId);
   
   createWindow();
@@ -171,11 +171,27 @@ function handleGetGrainBillName(event, batchID){
   });
 }
 
+function handleGetCentrifugeData(event, batchID){
+  return new Promise((resolve, reject) => {
+    brewDB.get(`SELECT * FROM centrifuge WHERE batchID=${batchID}`,
+      function (err, row){ 
+        if(!err) resolve(row)
+        else reject(row);
+      });
+  });
+}
+
 
 //HELPER METHODS TO UPDATE DATA
-function handleUpdateFermentorData(event, batchID, data){
-  console.log(data);
+function handleUpdateCentrifugeData(event, batchID, data){
+  let date = data.date;
+  let turbidity = data.turbidity ? data.turbidity : null;
+  let notes = data.notes ? `"${data.notes}"` : null;
 
+  brewDB.run(`UPDATE centrifuge SET turbidity=${turbidity}, date="${date}", notes=${notes} WHERE batchID=${batchID}`);
+}
+
+function handleUpdateFermentorData(event, batchID, data){
   let plato = data.plato ? data.plato : null;
   let ph = data.ph ? data.ph : null;
   let temp = data.temp ? data.temp : null;
@@ -184,7 +200,6 @@ function handleUpdateFermentorData(event, batchID, data){
 
   // this is required for entry manipulation 
   let dataID = data.dataID;
-  console.log(`UPDATE fermentor SET plato=${plato}, ph=${ph}, temp=${temp}, notes=${notes}, date="${date}" WHERE batchID=${batchID} AND dataID=${dataID}`);
 
   brewDB.run(`UPDATE fermentor SET plato=${plato}, ph=${ph}, temp=${temp}, notes=${notes}, date="${date}" WHERE batchID=${batchID} AND dataID=${dataID}`,
     function (err){ console.log(err) } 
@@ -282,6 +297,9 @@ function handleCreateNewBatch(event, name, grainBill, entries) {
         brewDB.run(`INSERT INTO batch VALUES (${batchID}, "${name}", "${grainBill}", "${date}", FALSE);`);
         brewDB.run(`INSERT INTO mash (batchID, date) VALUES (${batchID}, "${date}")`);
         brewDB.run(`INSERT INTO kettle (batchID, date) VALUES (${batchID}, "${date}")`);
+        brewDB.run(`INSERT INTO centrifuge (batchID) VALUES (${batchID})`);
+        brewDB.run(`INSERT INTO brite (batchID) VALUES (${batchID})`);
+        brewDB.run(`INSERT INTO output (batchID) VALUES (${batchID})`);
       } else {
         console.log(err);
       }
