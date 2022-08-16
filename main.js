@@ -49,6 +49,8 @@ app.whenReady().then(() => {
   ipcMain.on('addFermentorData', handleAddFermentorData);
   ipcMain.on('updateFermentorData', handleUpdateFermentorData);
   ipcMain.on('updateCentrifugeData', handleUpdateCentrifugeData);
+  ipcMain.on('setBriteData', handleSetBriteData);
+  ipcMain.on('updateOutputData', handleUpdateOutputData);
 
   //get data
   ipcMain.handle('mashData', handleGetMashData);
@@ -56,9 +58,11 @@ app.whenReady().then(() => {
   ipcMain.handle('fermentorData', handleGetFermentorData);
   ipcMain.handle('batchData', handleBatchDataAll);
   ipcMain.handle('getCentrifugeData', handleGetCentrifugeData);
+  ipcMain.handle('getBriteData', handleGetBriteData);
   ipcMain.handle('getGrainData', handleGrainData);
   ipcMain.handle('getGrainBillName', handleGetGrainBillName);
   ipcMain.handle('getNameFromID', handleGetNameFromId);
+  ipcMain.handle('getOutputData', handleGetOutputData);
   
   createWindow();
 
@@ -83,6 +87,28 @@ app.on('will-quit', () => {
 });
 
 //HELPER METHODS TO GET DATA
+function handleGetOutputData(event, batchID) {
+  return new Promise((resolve, reject) => {
+    brewDB.get(`SELECT * FROM output WHERE batchID=${batchID}`, 
+      function(err, row){
+        if(!err) resolve(row)
+        else reject(err);
+      }
+    );
+  });
+}
+
+function handleGetBriteData(event, batchID) {
+  return new Promise((resolve, reject) => {
+    brewDB.get(`SELECT * FROM brite WHERE batchID=${batchID}`,
+      function(err, row){
+        if(!err) resolve(row)
+        else reject(err);
+      }
+    );
+  });
+}
+
 function handleGetFermentorData(event, batchID) {
   return new Promise((resolve, reject) => {
     brewDB.all(`SELECT * FROM fermentor WHERE batchID=${batchID} ORDER BY dataID`,
@@ -183,6 +209,24 @@ function handleGetCentrifugeData(event, batchID){
 
 
 //HELPER METHODS TO UPDATE DATA
+function handleUpdateOutputData(event, batchID, data){
+  let notes = data.notes ? `"${data.notes}"` : null;
+  let sixth = data.sixthBbl ? data.sixthBbl : null;
+  let half = data.halfBbl ? data.halfBbl : null;
+  let cases = data.cases ? data.cases : null;
+
+  brewDB.run(`UPDATE output SET halfBarrel=${half}, sixthBarrel=${sixth}, cases=${cases}, notes=${notes}`);
+}
+
+function handleSetBriteData(event, batchID, data) {
+  let date = data.date;
+  let carbonation = data.carbonation ? data.carbonation : null;
+  let volumeIn = data.volumeIn ? data.volumeIn : null;
+  let notes = data.notes ? `"${data.notes}"` : null;
+
+  brewDB.run(`UPDATE brite SET volumeIn=${volumeIn}, carbonation=${carbonation}, date="${date}", notes=${notes}`);
+}
+
 function handleUpdateCentrifugeData(event, batchID, data){
   let date = data.date;
   let turbidity = data.turbidity ? data.turbidity : null;

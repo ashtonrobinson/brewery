@@ -15,6 +15,40 @@
     <title>Brewery Management--Output</title>
   </head>
   <body>
+    <h1 id="outputName"></h1>
+    
+    <div class="container">
+      <div class="my-2 row">
+        <div class="col">
+          <label for="halfBbl" class="form-label">Number of Half Barrels</label>
+          <input class="form-control" type="number" id="halfBbl" disabled="true">
+        </div>
+        <div class="mx-2 col">
+          <label for="sixthBbl" class="form-label">Number of Sixth Barrels</label>
+          <input class="form-control" type="number" id="sixthBbl" disabled="true">
+        </div>
+        <div class="col">
+          <label for="cases" class="form-label">Number of Cases</label>
+          <input class="form-control" type="number" id="cases" disabled="true">
+        </div>
+      </div>
+
+      <div class="my-2 row">
+        <label for="notes" class="form-label">Notes</label>
+        <textarea id="notes" disabled="true"></textarea>
+      </div>
+  
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-danger" id="lock">Unlock</button>
+        </div>
+        <div class="col">
+          <button class="btn btn-primary" id="update" disabled="true">Update</button>
+        </div>
+      </div>  
+    </div>
+
+    
 
     <!-- You can also require other files to run in this process -->
     <script src="./rendererOutput.js"></script>

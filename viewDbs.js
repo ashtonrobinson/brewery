@@ -63,7 +63,6 @@ brewDB.all('SELECT * FROM batch',
             
             grainDB.serialize(() => {
                 grainNames.map(name => {
-                    console.log(`Grain Table for ${name}`);
                     grainDB.all(`SELECT * FROM ${name}`, 
                         function(err, rows){
                             if(!err){

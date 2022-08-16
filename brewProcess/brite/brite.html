@@ -16,6 +16,45 @@
   </head>
   <body>
 
+    <h1 id="briteID"></h1>
+
+    <div class="container">
+      <div class="row">
+        <label for="date" class="form-label">Date</label>
+        <input type="text" class="form-control" id="date" disabled="true">
+      </div>
+
+      <div class="my-2 row"> 
+        <div class="col">
+          <label for="volIn" class="form-label">Volume In</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="volIn" disabled="true">
+            <div class="input-group-append">
+              <span class="input-group-text">gallons</span>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <label for="carbonation" class="form-label">Carbonation</label>
+          <input class="form-control" type="text" id="carbonation" disabled="true">
+        </div>
+      </div>
+
+      <div class="my-2 row">
+        <label for="notes" class="form-label">Notes</label>
+        <textarea id="notes" disabled="true"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-danger" id="lock">Unlock</button>
+        </div>
+        <div class="col">
+          <button class="btn btn-primary" id="update" disabled="true">Update</button>
+        </div>
+      </div>
+    </div>
+
     <!-- You can also require other files to run in this process -->
     <script src="./rendererBrite.js"></script>
   </body>
