@@ -18,14 +18,15 @@ window.addEventListener('DOMContentLoaded', async () => {
                         <span class="input-group-text" id="units">lbs</span>
                     </div>
                 </div>
-            </div>np
+            </div>
             <div class="col">
-                <label for="grainType-${index}" class="form-label">Pounds of Grain</label>
+                <label for="grainType-${index}" class="form-label">Type of Grain</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="grainType-${index}" disabled="true" value="${grainType}">
                 </div>
             </div>
         </div>`;
+        
         $('#grainBill').append(html);
     });
 });

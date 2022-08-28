@@ -36,7 +36,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             </div>
         </div>`;
         let newElem = $(html);
-        
+
         if (!status) newElem.appendTo("#completedBatches") 
         else newElem.appendTo("#existingBatches");
 
@@ -50,8 +50,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             cardBody.append(btn);
             existing.append(newElem);
         } else {
-            btn = $(`<button id="completed-${batchID}" class="btn btn-danger">Uncomplete</button>`);
+            btn = $(`<button id="completed-${batchID}" class="btn btn-warning">Uncomplete</button>`);
             cardBody.append(btn);
+            
+            let removeButton = $(`<button id="remove-${batchID}", class="btn btn-danger">Remove</button>`);
+            cardBody.append(removeButton);
+
             completed.append(newElem);
         }       
     });
@@ -74,6 +78,14 @@ window.addEventListener('load', async () => {
             window.dashboard.changeStatus(batchID);
         });
 
+        let removeBtn = document.getElementById(`remove-${batchID}`)
+        if(removeBtn){
+            removeBtn.addEventListener('click',() => {
+                window.dashboard.remove(batchID);
+
+                $(`#batch-${batchID}`).remove()
+            });
+        } else console.log('no remote');
     }); 
 });
 

@@ -63,6 +63,9 @@ app.whenReady().then(() => {
   ipcMain.handle('getGrainBillName', handleGetGrainBillName);
   ipcMain.handle('getNameFromID', handleGetNameFromId);
   ipcMain.handle('getOutputData', handleGetOutputData);
+
+  //remove data
+  ipcMain.on('remove', handleRemove);
   
   createWindow();
 
@@ -85,6 +88,17 @@ app.on('will-quit', () => {
   brewDB.close();
   grainDB.close();
 });
+
+// HELPER METHODS TO REMOVE DATA
+function handleRemove(event, batchID) {
+  brewDB.run(`DELETE FROM batch WHERE batchID=${batchID}`, function(err) {console.log(err)});
+  brewDB.run(`DELETE FROM mash WHERE batchID=${batchID}`, function(err) {console.log(err)});
+  brewDB.run(`DELETE FROM kettle WHERE batchID=${batchID}`, function(err) {console.log(err)});
+  brewDB.run(`DELETE FROM fermentor WHERE batchID=${batchID}`, function(err) {console.log(err)});
+  brewDB.run(`DELETE FROM centrifuge WHERE batchID=${batchID}`, function(err) {console.log(err)});
+  brewDB.run(`DELETE FROM brite WHERE batchID=${batchID}`, function(err) {console.log(err)});
+  brewDB.run(`DELETE FROM output WHERE batchID=${batchID}`, function(err) {console.log(err)});
+}
 
 //HELPER METHODS TO GET DATA
 function handleGetOutputData(event, batchID) {
