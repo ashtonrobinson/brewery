@@ -6,6 +6,16 @@ createButton.addEventListener('click', () => {
     window.dashboard.createBatchWin();
 });
 
+const createWithExisting = document.getElementById('createNewBatchExisting');
+createWithExisting.addEventListener('click', async () => {
+    let grainBills = await window.dashboard.getGrainBills();
+    if (grainBills.length > 0){
+        window.dashboard.createBatchWinExisting();
+    } else {
+        alert('No current grain bills');
+    }
+});
+
 window.addEventListener('DOMContentLoaded', async () => {
     let existing = $('#existingBatches');
     let completed = $('#completedBatches');
@@ -29,8 +39,19 @@ window.addEventListener('DOMContentLoaded', async () => {
                         <h5 class="card-title">Name: ${batchName}</h5>
                         <p class="card-text">Grain Bill: ${nameGrain}</p>
                         <p class="card-text">Date Created: ${date}</p>
+                        <div class="row">
+                            <div class="col-2">
+                                <button id="details-${batchID}" class="btn btn-primary">View</button>
+                            </div>
+                            <div id="complete" class="col-3"></div>
 
-                        <button id="details-${batchID}" class="btn btn-primary">View</button>
+                            <div class="col-5"></div>
+
+                            <div class="col-2">
+                                <button id="remove-${batchID}", class="btn btn-danger">Remove</button>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -41,20 +62,18 @@ window.addEventListener('DOMContentLoaded', async () => {
         else newElem.appendTo("#existingBatches");
 
         
-        let cardBody = $(`#body-${batchID}`);
+        let cardBody = $(`#body-${batchID} #complete`);
         let btn;
 
         // status is true if the batch has been completed
         if (!status){
             btn = $(`<button id="completed-${batchID}" class="btn btn-success">Complete</button>`);
             cardBody.append(btn);
+
             existing.append(newElem);
         } else {
             btn = $(`<button id="completed-${batchID}" class="btn btn-warning">Uncomplete</button>`);
             cardBody.append(btn);
-            
-            let removeButton = $(`<button id="remove-${batchID}", class="btn btn-danger">Remove</button>`);
-            cardBody.append(removeButton);
 
             completed.append(newElem);
         }       

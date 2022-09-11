@@ -14,4 +14,9 @@ brewDB.serialize(() => {
     brewDB.run('CREATE TABLE IF NOT EXISTS output (batchID INT, halfBarrel INT, sixthBarrel INT, cases INT, notes TEXT)');
 });
 
+//create a top level grain db to store each table name
+grainDB.serialize(() => {
+    grainDB.run('CREATE TABLE IF NOT EXISTS metadata (grainName TEXT)');
+});
+
 module.exports = {brewDB: brewDB,grainDB: grainDB};

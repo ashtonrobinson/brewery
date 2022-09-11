@@ -28,6 +28,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   // functions to create windows
   ipcMain.on('createBatchWindow', handleCreateBatchWindow);
+  ipcMain.on('createBatchWindowExisting', handleCreateBatchWindowFromExisting)
   ipcMain.on('createViewWin', handleCreateViewWindow);
   ipcMain.on('createMashWin', handleCreateMashWindow);
   ipcMain.on('createKettleWin', handleCreateKettleWindow);
@@ -46,6 +47,7 @@ app.whenReady().then(() => {
   ipcMain.on('setKettleData', handleSetKettleData);
   ipcMain.on('changeStatus', handleChangeStatus);
   ipcMain.on('createBatchEntry', handleCreateNewBatch);
+  ipcMain.on('createBatchExistingGrain', handleCreateNewBatch);
   ipcMain.on('addFermentorData', handleAddFermentorData);
   ipcMain.on('updateFermentorData', handleUpdateFermentorData);
   ipcMain.on('updateCentrifugeData', handleUpdateCentrifugeData);
@@ -63,6 +65,7 @@ app.whenReady().then(() => {
   ipcMain.handle('getGrainBillName', handleGetGrainBillName);
   ipcMain.handle('getNameFromID', handleGetNameFromId);
   ipcMain.handle('getOutputData', handleGetOutputData);
+  ipcMain.handle('getGrainBillNames', handleGetGrainBills);
 
   //remove data
   ipcMain.on('remove', handleRemove);
@@ -91,16 +94,21 @@ app.on('will-quit', () => {
 
 // HELPER METHODS TO REMOVE DATA
 function handleRemove(event, batchID) {
-  brewDB.run(`DELETE FROM batch WHERE batchID=${batchID}`, function(err) {console.log(err)});
-  brewDB.run(`DELETE FROM mash WHERE batchID=${batchID}`, function(err) {console.log(err)});
-  brewDB.run(`DELETE FROM kettle WHERE batchID=${batchID}`, function(err) {console.log(err)});
-  brewDB.run(`DELETE FROM fermentor WHERE batchID=${batchID}`, function(err) {console.log(err)});
-  brewDB.run(`DELETE FROM centrifuge WHERE batchID=${batchID}`, function(err) {console.log(err)});
-  brewDB.run(`DELETE FROM brite WHERE batchID=${batchID}`, function(err) {console.log(err)});
-  brewDB.run(`DELETE FROM output WHERE batchID=${batchID}`, function(err) {console.log(err)});
+  brewDB.run(`DELETE FROM batch WHERE batchID=${batchID}`, function(err) {if (err) console.log(err)});
+  brewDB.run(`DELETE FROM mash WHERE batchID=${batchID}`, function(err) {if (err) console.log(err)});
+  brewDB.run(`DELETE FROM kettle WHERE batchID=${batchID}`, function(err) {if (err) console.log(err)});
+  brewDB.run(`DELETE FROM fermentor WHERE batchID=${batchID}`, function(err) {if (err) onsole.log(err)});
+  brewDB.run(`DELETE FROM centrifuge WHERE batchID=${batchID}`, function(err) {if (err) console.log(err)});
+  brewDB.run(`DELETE FROM brite WHERE batchID=${batchID}`, function(err) {if (err) onsole.log(err)});
+  brewDB.run(`DELETE FROM output WHERE batchID=${batchID}`, function(err) {if (err) console.log(err)});
 }
 
 //HELPER METHODS TO GET DATA
+async function handleGetGrainBills(event){
+  let grain = await getGrainBills();
+  return grain;
+}
+
 function handleGetOutputData(event, batchID) {
   return new Promise((resolve, reject) => {
     brewDB.get(`SELECT * FROM output WHERE batchID=${batchID}`, 
@@ -338,32 +346,80 @@ function handleChangeStatus(event, batchID){
   win.reload();
 }
 
-//add data entries to the database, entires is list 
-// of (grainType,lbGrain) in form (string,float)
-function handleCreateNewBatch(event, name, grainBill, entries) {
-  //find the largest batch ID and add one to it
-  brewDB.get('SELECT MAX(batchID) FROM batch;', 
+async function getNextBatchID() {
+  return new Promise((resolve, reject) => {
+    brewDB.get('SELECT MAX(batchID) FROM batch;', 
     function (err, row) {
       let batchID;
       if (!err) {
         if (row['MAX(batchID)']) {batchID = row['MAX(batchID)']+1}
         else {batchID = 1}
 
-        const date = (new Date()).toLocaleDateString();
-        // query to add the next entry
-        
-        brewDB.run(`INSERT INTO batch VALUES (${batchID}, "${name}", "${grainBill}", "${date}", FALSE);`);
-        brewDB.run(`INSERT INTO mash (batchID, date) VALUES (${batchID}, "${date}")`);
-        brewDB.run(`INSERT INTO kettle (batchID, date) VALUES (${batchID}, "${date}")`);
-        brewDB.run(`INSERT INTO centrifuge (batchID) VALUES (${batchID})`);
-        brewDB.run(`INSERT INTO brite (batchID) VALUES (${batchID})`);
-        brewDB.run(`INSERT INTO output (batchID) VALUES (${batchID})`);
-      } else {
-        console.log(err);
+        resolve(batchID);
+      } else reject(err);
+    });
+  });
+}
+
+//add data entries to the database, entires is list 
+// of (grainType,lbGrain) in form (string,float)
+async function handleCreateNewBatch(event, name, grainBill, entries) {
+  //find the largest batch ID and add one to it
+  const batchID = await getNextBatchID();
+  const date = (new Date()).toLocaleDateString();
+
+  if(entries) {
+    let data = await getGrainBills();
+    if (data){
+      let grainNames = data.map(d => d['grainName']);
+      if (grainNames.includes(grainBill)){
+        // check if copy has been made alredy
+        let numCopies = grainNames.filter(n => n.startsWith(grainBill));
+        if (numCopies.length > 1){
+          let largestCopy = numCopies[numCopies.length-1];
+          let num = Number(largestCopy.substring(largestCopy.length-1)) + 1;
+          grainBill = grainBill.concat(num.toString());
+        } else {
+          grainBill = grainBill.concat('1');
+        }
       }
     }
-  );
+    addGrainBill(entries, grainBill);
+  }
 
+  brewDB.serialize(() => {
+    brewDB.run(`INSERT INTO batch VALUES (${batchID}, "${name}", "${grainBill}", "${date}", FALSE);`);
+    brewDB.run(`INSERT INTO mash (batchID, date) VALUES (${batchID}, "${date}")`);
+    brewDB.run(`INSERT INTO kettle (batchID, date) VALUES (${batchID}, "${date}")`);
+    brewDB.run(`INSERT INTO centrifuge (batchID) VALUES (${batchID})`);
+    brewDB.run(`INSERT INTO brite (batchID) VALUES (${batchID})`);
+    brewDB.run(`INSERT INTO output (batchID) VALUES (${batchID})`);
+  });
+  
+  const webContents = event.sender;
+  const createWin = BrowserWindow.fromWebContents(webContents);
+  
+  // get parent window and update existing batches
+  const mainWin = createWin.getParentWindow();
+  mainWin.reload();
+
+  //finally close the window
+  createWin.close();
+}
+
+async function getGrainBills(){
+  return new Promise((resolve, reject) => {
+    grainDB.all(`SELECT grainName FROM metadata`, 
+      function (err, rows){
+        if(!err) resolve(rows)
+        else reject(err);
+      }
+    )
+  });
+}
+
+function addGrainBill(entries, grainBill){
+  grainDB.run(`INSERT INTO metadata (grainName) VALUES ("${grainBill}")`);
   let grainQueue = [];
   // enter the grain entries
   entries.map(entry => {
@@ -385,18 +441,7 @@ function handleCreateNewBatch(event, name, grainBill, entries) {
       }
     }
   );
-  
-  const webContents = event.sender;
-  const createWin = BrowserWindow.fromWebContents(webContents);
-  
-  // get parent window and update existing batches
-  const mainWin = createWin.getParentWindow();
-  mainWin.reload();
-
-  //finally close the window
-  createWin.close();
 }
-
 
 //HELPER METHODS TO CREATE NEW WINDOWS
 function handleCreateFermentorDataWin(event, batchID){
@@ -576,10 +621,27 @@ function handleCreateBatchWindow(event) {
   //batchWindow.webContents.openDevTools();
 }
 
+function handleCreateBatchWindowFromExisting(event) {
+  const webContents = event.sender;
+  const parent = BrowserWindow.fromWebContents(webContents);
+
+  const batchWindow = new BrowserWindow({
+    parent: parent,
+    webPreferences: {
+      preload: path.join(__dirname, 'create/existingGrain/preloadCreateFromExisting.js')
+    }
+  });
+
+  batchWindow.loadFile(path.join(__dirname, 'create/existingGrain/createFromExisting.html'));
+  batchWindow.webContents.openDevTools();
+}
+
 //functions to close modal windows
 function handleCloseEntryWin(event){
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
   win.close();
 }
+
+
 

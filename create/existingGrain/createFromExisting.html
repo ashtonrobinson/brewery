@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src * data:;">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../../contents/bootstrap/5.2.0/css/bootstrap.min.css" />
+    <script src="../../contents/jquery/jquery.min.js"></script>
+
+    <title>Brewery Management--Create From Exsitng Grain Bill</title>
+  </head>
+  <body>
+    <h1>Create A New Batch</h1>
+    <div class="container">
+      <div class="my-2 row">
+        <label for="batchName" class="form-label">Batch Name</label>
+        <input type="text" class="form-control" id="batchName">
+      </div>
+      <!-- add a way to view existing grain bill information -->
+      <div class="my-2 row">
+        <select id="grainOptions" class="form-select" required="true">
+            <option selected></option>
+            <!-- inject the options here -->
+        </select>
+      </div>
+    </div>
+
+    <div class="mx-2 d-grid" id="submitGrain">
+        <button id="submit" class="btn btn-success">Create</button>
+    </div>
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./rendererCreateFromExisting.js"></script>
+  </body>
+</html>

@@ -5,6 +5,14 @@ const grainDB = new sqlite3.Database('grainDB');
 
 
 brewDB.serialize(() => {
+    brewDB.all(`SELECT * FROM batch`, function (err, rows){
+        console.log("Batches Table")
+        if(!err){
+            rows.map(row => console.log(row));
+        }
+        console.log("\n");
+    });
+    
     brewDB.all(`SELECT * FROM mash`, function (err, rows){
         console.log("Mash Table")
         if(!err){
@@ -54,34 +62,32 @@ brewDB.serialize(() => {
     });
 });
 
-// print batch and grain data
-brewDB.all('SELECT * FROM batch', 
-    function (err, rows){
-        let grainNames = [];
-        if (!err){
-            let grainNames = rows.map(row => row['nameGrainBill']);
-            
-            grainDB.serialize(() => {
-                grainNames.map(name => {
-                    grainDB.all(`SELECT * FROM ${name}`, 
-                        function(err, rows){
-                            if(!err){
-                                console.log('Grain Table:', name);
-                                rows.map(row => console.log(row));
-                            } else {
-                                console.log(err);
+//print grainBill infor
+grainDB.serialize(() => {
+    grainDB.all(`SELECT grainName FROM metadata`, 
+        function(err, rows){
+            if(!err){
+                let grainNames = rows.map(row => row['grainName']);
+                console.log('Metadata:', grainNames);
+                grainDB.serialize(() => {
+                    grainNames.map(nameGrain => {
+                        grainDB.all(`SELECT * FROM ${nameGrain}`, 
+                            function (err, rows) {
+                                if (!err){
+                                    console.log('Grain Table:', nameGrain);
+                                    rows.map(row => console.log(row));
+                                }
                             }
-                        }
-                    );
-                    console.log("\n");
+                        );
+                    });
                 });
-            });
-            
-        } else {
-            console.log(err);
+            } else console.log(err);
         }
-    }  
-);
+    );
+});
+
+
+
 
 
 
