@@ -4,4 +4,5 @@ const batchID = process.argv[process.argv.length-1];
 contextBridge.exposeInMainWorld('grain', {
     getGrainBillName: () => ipcRenderer.invoke('getGrainBillName', batchID),
     getGrainBill: () => ipcRenderer.invoke('getGrainData', batchID),
+    updateGrainData: (grainBill, data) => ipcRenderer.send('updateGrainData', grainBill, data)
 });

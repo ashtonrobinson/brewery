@@ -97,14 +97,11 @@ window.addEventListener('load', async () => {
             window.dashboard.changeStatus(batchID);
         });
 
-        let removeBtn = document.getElementById(`remove-${batchID}`)
-        if(removeBtn){
-            removeBtn.addEventListener('click',() => {
-                window.dashboard.remove(batchID);
-
-                $(`#batch-${batchID}`).remove()
-            });
-        } else console.log('no remote');
+        let removeBtn = document.getElementById(`remove-${batchID}`);
+        removeBtn.addEventListener('click',() => {
+            window.dashboard.remove(batchID);
+            $(`#batch-${batchID}`).remove()
+        });
     }); 
 });
 

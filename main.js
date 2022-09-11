@@ -53,6 +53,7 @@ app.whenReady().then(() => {
   ipcMain.on('updateCentrifugeData', handleUpdateCentrifugeData);
   ipcMain.on('setBriteData', handleSetBriteData);
   ipcMain.on('updateOutputData', handleUpdateOutputData);
+  ipcMain.on('updateGrainData', handleUpdateGrainData);
 
   //get data
   ipcMain.handle('mashData', handleGetMashData);
@@ -231,6 +232,20 @@ function handleGetCentrifugeData(event, batchID){
 
 
 //HELPER METHODS TO UPDATE DATA
+function handleUpdateGrainData(event, grainBill, data){
+  console.log(grainBill, data);
+  let queries = [];
+  for (let id in data){
+    let grainLb = data[id][0];
+    let grainType = data[id][1];
+
+    queries.push(`UPDATE ${grainBill} SET grainType="${grainType}", grainLb=${grainLb} WHERE rowID=${id}`);
+  }
+  grainDB.serialize(() => {
+    queries.map(q => grainDB.run(q));
+  });
+}
+
 function handleUpdateOutputData(event, batchID, data){
   let notes = data.notes ? `"${data.notes}"` : null;
   let sixth = data.sixthBbl ? data.sixthBbl : null;
@@ -422,15 +437,15 @@ function addGrainBill(entries, grainBill){
   grainDB.run(`INSERT INTO metadata (grainName) VALUES ("${grainBill}")`);
   let grainQueue = [];
   // enter the grain entries
-  entries.map(entry => {
+  entries.map((entry, index) => {
     let grainType = entry[0];
     let lbGrain = entry[1];
 
-    grainQueue.push(`INSERT INTO ${grainBill} (grainType, grainLb) VALUES ("${grainType}", ${lbGrain});`)
+    grainQueue.push(`INSERT INTO ${grainBill} (rowID, grainType, grainLb) VALUES (${index}, "${grainType}", ${lbGrain});`)
   });
 
   // TODO: problem if table exists and the details of the grain bill is different
-  grainDB.run(`CREATE TABLE ${grainBill} (grainType TEXT, grainLb REAL);`, 
+  grainDB.run(`CREATE TABLE ${grainBill} (rowID INT, grainType TEXT, grainLb REAL);`, 
     function (err){
       if(!err){
         grainQueue.map(sql => {
